@@ -8,6 +8,9 @@ dotenv.config();
 
 import contactsRouter from "./routes/contactsRouter.js"; 
 
+import Contact from "./db//models/contactModel.js";
+await Contact.sync();
+
 const app = express();
 
 app.use(morgan("tiny"));
