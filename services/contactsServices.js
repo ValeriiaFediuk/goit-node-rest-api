@@ -26,12 +26,13 @@ async function removeContact(id) {
   return contact;
 }
 
-async function updateStatusContact(id, favorite) {
+async function updateStatusContact(id, data) {
   const contact = await Contact.findByPk(id);
   if (!contact) return null;
-  await contact.update({ favorite });
+  await contact.update({ favorite: data.favorite });
   return contact;
 }
+
 
 export {
   listContacts,

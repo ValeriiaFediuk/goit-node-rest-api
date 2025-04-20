@@ -1,4 +1,11 @@
-import { listContacts, getContactById, removeContact, addContact, updateContact } from "../services/contactsServices.js";
+import {
+  listContacts,
+  getContactById,
+  removeContact,
+  addContact,
+  updateContact,
+  updateStatusContact,
+} from "../services/contactsServices.js";
 import HttpError from "../helpers/HttpError.js";
 
 const getAll = async (req, res, next) => {
@@ -41,12 +48,35 @@ const add = async (req, res, next) => {
 
 const update = async (req, res, next) => {
   try {
-    const updatedContact = await updateContact(req.params.id, req.body);
-    if (!updatedContact) throw HttpError(404, "Not found");
-    res.json(updatedContact);
+    if (!Object.keys(req.body).length) {
+      throw HttpError(400, "Body must have at least one field");
+    }
+    const contact = await updateContact(req.params.id, req.body);
+    if (!contact) {
+      throw HttpError(404, "Not found");
+    }
+    res.json(contact);
   } catch (error) {
     next(error);
   }
 };
 
-export { getAll, getById, remove, add, update };
+const updateStatus = async (req, res, next) => {
+  try {
+    if (!("favorite" in req.body)) {
+      throw HttpError(400, "Missing field 'favorite'");
+    }
+
+    const contact = await updateStatusContact(req.params.id, req.body);
+
+    if (!contact) {
+      throw HttpError(404, "Not found");
+    }
+
+    res.json(contact);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export { getAll, getById, remove, add, update, updateStatus };
