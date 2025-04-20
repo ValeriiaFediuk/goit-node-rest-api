@@ -1,0 +1,24 @@
+{
+"development": {
+    "username": "db_contacts_rknb_user",
+    "password": "Qr4UEB0YO6dcb1SLq0JKYVdGuOPPDnip",
+    "database": "db_contacts_rknb",
+    "host": "dpg-d00m39k9c44c73bbiaog-a.oregon-postgres.render.com",
+    "dialect": "postgres",
+    "port": 5432
+  },
+  "test": {
+    "username": "root",
+    "password": null,
+    "database": "database_test",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  },
+  "production": {
+    "username": "root",
+    "password": null,
+    "database": "database_production",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  }
+}
