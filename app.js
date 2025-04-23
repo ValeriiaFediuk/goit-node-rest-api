@@ -7,9 +7,13 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import contactsRouter from "./routes/contactsRouter.js"; 
+import authRouter from "./routes/authRouter.js";
 
 import Contact from "./db//models/contactModel.js";
+import User from "./db/models/userModel.js"; 
+
 await Contact.sync();
+await User.sync();
 
 const app = express();
 
@@ -18,6 +22,7 @@ app.use(cors());
 app.use(express.json()); 
 
 app.use("/api/contacts", contactsRouter);
+app.use("/api/auth", authRouter);
 
 app.use((_, res) => {
   res.status(404).json({ message: "Route not found" });
