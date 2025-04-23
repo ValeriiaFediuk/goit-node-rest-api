@@ -61,4 +61,29 @@ const login = async (req, res, next) => {
   }
 };
 
-export { register, login };
+const logout = async (req, res, next) => {
+  try {
+    const user = req.user;
+    if (!user) {
+      throw HttpError(401, "Not authorized");
+    }
+
+    user.token = null;
+    await user.save();
+
+    res.status(204).send(); 
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getCurrent = async (req, res, next) => {
+  try {
+    const { email, subscription } = req.user;
+    res.json({ email, subscription });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export { register, login, logout, getCurrent };
