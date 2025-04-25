@@ -22,7 +22,7 @@ const User = sequelize.define("User", {
   },
   avatarURL: {
     type: DataTypes.STRING,
-    defaultValue: '',
+    allowNull: true,
   },
 });
 
