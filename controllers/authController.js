@@ -1,11 +1,43 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import gravatar from "gravatar"; 
 import HttpError from "../helpers/HttpError.js";
 import { registerSchema, loginSchema } from "../schemas/authSchemas.js";
 import { createUser, findUserByEmail } from "../services/authServices.js";
 import dotenv from "dotenv";
+import multer from "multer";
+import path from "path";
+import fs from "fs/promises";
 
 dotenv.config();
+
+const storage = multer.diskStorage({
+  destination: async (req, file, cb) => {
+    const dir = path.join(__dirname, '../public/avatars');
+    await fs.mkdir(dir, { recursive: true });
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    const extname = path.extname(file.originalname);
+    const filename = `${req.user.id}_${Date.now()}${extname}`;
+    cb(null, filename);
+  }
+});
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const fileTypes = /jpeg|jpg|png|gif/;
+    const extname = fileTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = fileTypes.test(file.mimetype);
+    if (extname && mimetype) {
+      return cb(null, true);
+    } else {
+      cb(new HttpError(400, 'Only image files are allowed (jpg, jpeg, png, gif)'));
+    }
+  }
+}).single('avatar');
 
 const register = async (req, res, next) => {
   try {
@@ -20,15 +52,40 @@ const register = async (req, res, next) => {
     }
 
     const user = await createUser(email, password);
+    
+    const avatarURL = gravatar.url(email, { s: "250", d: "retro" }, true);
+
+    await user.update({ avatarURL });
+
     res.status(201).json({
       user: {
         email: user.email,
         subscription: user.subscription,
+        avatarURL: user.avatarURL,
       },
     });
   } catch (error) {
     next(error);
   }
+};
+
+const updateAvatar = async (req, res, next) => {
+  upload(req, res, async (err) => {
+    if (err) {
+      return next(err);
+    }
+
+    try {
+      const { user } = req;
+      const avatarURL = `/avatars/${req.file.filename}`;
+
+      await updateUserAvatar(user.id, avatarURL);
+
+      res.status(200).json({ avatarURL });
+    } catch (error) {
+      next(error);
+    }
+  });
 };
 
 const login = async (req, res, next) => {
@@ -86,4 +143,4 @@ const getCurrent = async (req, res, next) => {
   }
 };
 
-export { register, login, logout, getCurrent };
+export { register, login, logout, getCurrent, updateAvatar };
