@@ -1,9 +1,13 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import gravatar from "gravatar"; 
 import HttpError from "../helpers/HttpError.js";
 import { registerSchema, loginSchema } from "../schemas/authSchemas.js";
-import { createUser, findUserByEmail } from "../services/authServices.js";
+import { createUser, findUserByEmail, updateUserAvatar } from "../services/authServices.js";
 import dotenv from "dotenv";
+import multer from "multer";
+import path from "path";
+import fs from "fs/promises";
 
 dotenv.config();
 
@@ -15,15 +19,18 @@ const register = async (req, res, next) => {
     const { email, password } = req.body;
 
     const existingUser = await findUserByEmail(email);
-    if (existingUser) {
-      throw HttpError(409, "Email in use");
-    }
+    if (existingUser) throw HttpError(409, "Email in use");
 
     const user = await createUser(email, password);
+    const avatarURL = gravatar.url(email, { s: "250", d: "retro" }, true);
+
+    await user.update({ avatarURL });
+
     res.status(201).json({
       user: {
         email: user.email,
         subscription: user.subscription,
+        avatarURL: user.avatarURL,
       },
     });
   } catch (error) {
@@ -86,4 +93,17 @@ const getCurrent = async (req, res, next) => {
   }
 };
 
-export { register, login, logout, getCurrent };
+const updateAvatar = async (req, res, next) => {
+  try {
+    if (!req.file) throw HttpError(400, "Avatar file is required");
+
+    const avatarURL = `/avatars/${req.file.filename}`;
+    await updateUserAvatar(req.user.id, avatarURL);
+
+    res.status(200).json({ avatarURL });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export { register, login, logout, getCurrent, updateAvatar };
