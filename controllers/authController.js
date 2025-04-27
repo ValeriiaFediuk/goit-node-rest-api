@@ -36,8 +36,13 @@ const register = async (req, res, next) => {
     await sendEmail(emailContent);
 
     res.status(201).json({
-      message: "Registration successful. Please check your email for verification link.",
+      user: {
+        email: user.email,
+        subscription: user.subscription,
+        avatarURL: user.avatarURL,
+      },
     });
+
   } catch (error) {
     next(error);
   }
