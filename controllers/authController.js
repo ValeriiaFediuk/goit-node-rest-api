@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import gravatar from "gravatar"; 
 import HttpError from "../helpers/HttpError.js";
-import User from "../models/user.js";
+import User from "../db/models/userModel.js";
 import { registerSchema, loginSchema } from "../schemas/authSchemas.js";
 import { createUser, findUserByEmail, updateUserAvatar } from "../services/authServices.js";
 import dotenv from "dotenv";
